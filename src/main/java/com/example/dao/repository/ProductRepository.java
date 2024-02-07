@@ -1,10 +1,10 @@
 package com.example.dao.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+
 import java.io.BufferedReader;
 
 import java.io.IOException;
@@ -16,10 +16,11 @@ import java.util.stream.Collectors;
 @Repository
 public class ProductRepository {
     private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final String query;
 
-    @Autowired
-    public  ProductRepository(NamedParameterJdbcTemplate jdbcTemplate){
+    public ProductRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.query = read("query.sql");
     }
 
     private static String read(String scriptFileName) {
@@ -31,15 +32,10 @@ public class ProductRepository {
         }
     }
 
-    public String getProductName(String name) {
-        String query = read("query.sql");
+    public List<String> getProductName(String name) {
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("customerName", name);
-        List<String> result = jdbcTemplate.queryForList(query, parameterSource, String.class);
-        if (result.isEmpty()) {
-            return "Нет данных";
-        } else {
-            return result.get(0);
-        }
+        return jdbcTemplate.queryForList(query, parameterSource, String.class);
+
     }
 }
